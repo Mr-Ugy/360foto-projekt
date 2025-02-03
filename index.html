@@ -10,14 +10,81 @@
             height: 100%;
             overflow: hidden;
         }
+        /* Galerie miniatur - umístění dole uprostřed */
+        #gallery {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1;
+        }
+        #gallery img {
+            width: 100px;
+            height: 60px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border 0.2s;
+        }
+        #gallery img:hover {
+            border: 2px solid white;
+        }
     </style>
 </head>
 <body>
     <a-scene>
         <a-assets>
-            <img id="360foto" src="360foto.jpg" crossorigin="anonymous">
+            <!-- Nahraj si svoje 360° fotky! -->
+            <img id="img1" src="360foto1.jpg" crossorigin="anonymous">
+            <img id="img2" src="360foto2.jpg" crossorigin="anonymous">
+            <img id="img3" src="360foto3.jpg" crossorigin="anonymous">
         </a-assets>
-        <a-sky src="#360foto" rotation="0 -90 0"></a-sky>
+
+        <!-- Kamera s nastavitelným zorným polem pro zoom -->
+        <a-camera id="camera" position="0 1.6 0"></a-camera>
+
+        <!-- Výchozí 360° zobrazení, na začátku ukazuje první fotku -->
+        <a-sky id="sky" src="#img1" rotation="0 -90 0"></a-sky>
     </a-scene>
+
+    <!-- Galerie miniatur -->
+    <div id="gallery">
+        <img src="360foto1.jpg" data-target="#img1" alt="Fotka 1">
+        <img src="360foto2.jpg" data-target="#img2" alt="Fotka 2">
+        <img src="360foto3.jpg" data-target="#img3" alt="Fotka 3">
+    </div>
+
+    <script>
+        // Funkce pro změnu 360° fotografie při kliknutí na miniaturu
+        const thumbnails = document.querySelectorAll('#gallery img');
+        thumbnails.forEach(function(img) {
+            img.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const sky = document.getElementById('sky');
+                sky.setAttribute('src', targetId);
+            });
+        });
+
+        // Zoom pomocí kolečka myši
+        const sceneEl = document.querySelector('a-scene');
+        const cameraEl = document.getElementById('camera');
+
+        sceneEl.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            // Získej aktuální zorné pole kamery
+            let currentFov = cameraEl.getAttribute('camera').fov;
+            // Nastav citlivost zoomu (můžeš si pohrát s hodnotou 0.05)
+            currentFov += e.deltaY * 0.05;
+            // Omezení zorného pole, aby to nebylo moc blízko ani moc daleko
+            if (currentFov < 20) currentFov = 20;
+            if (currentFov > 100) currentFov = 100;
+            cameraEl.setAttribute('camera', 'fov', currentFov);
+        });
+    </script>
 </body>
 </html>
