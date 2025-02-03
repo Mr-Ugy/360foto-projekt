@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Prohlížeč 360° Fotografie</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <a-scene>
+        <a-assets>
+            <img id="360foto" src="360foto.jpg" crossorigin="anonymous">
+        </a-assets>
+        <a-sky src="#360foto" rotation="0 -90 0"></a-sky>
+    </a-scene>
+</body>
+</html>
