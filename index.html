@@ -63,8 +63,8 @@
             <!-- Dynamicky nahrávané 360° fotky z JSON -->
         </a-assets>
 
-        <!-- Kamera s nastavitelným zorným polem pro zoom -->
-        <a-camera id="camera" position="0 1.6 0"></a-camera>
+        <!-- Kamera s podporou zoomování -->
+        <a-camera id="camera" position="0 1.6 0" wasd-controls-enabled="false"></a-camera>
 
         <!-- Výchozí 360° zobrazení, dynamicky se nastaví první dostupná fotka -->
         <a-sky id="sky" rotation="0 -90 0"></a-sky>
@@ -91,27 +91,28 @@
                 
                 if (!files || files.length === 0) return;
                 
-                // Nastavení prvního obrázku jako výchozí
-                sky.setAttribute('src', files[0].url);
+                // Nastavení prvního obrázku jako výchozí v nejvyšší kvalitě
+                sky.setAttribute('src', files[0].url + '=s4096');
                 
                 files.forEach((file, index) => {
                     const imgId = `img${index}`;
+                    const highResUrl = file.url + '=s4096';
                     
                     // Vytvoření assetu pro A-Frame
                     const imgElement = document.createElement('img');
                     imgElement.setAttribute('id', imgId);
-                    imgElement.setAttribute('src', file.url);
+                    imgElement.setAttribute('src', highResUrl);
                     imgElement.setAttribute('crossorigin', 'anonymous');
                     assetsContainer.appendChild(imgElement);
                     
                     // Vytvoření miniatury v galerii
                     const thumbnail = document.createElement('img');
-                    thumbnail.setAttribute('src', file.url);
+                    thumbnail.setAttribute('src', highResUrl);
                     thumbnail.setAttribute('data-target', imgId);
                     thumbnail.setAttribute('alt', `Fotka ${index + 1}`);
                     
                     thumbnail.addEventListener('click', function() {
-                        sky.setAttribute('src', file.url);
+                        sky.setAttribute('src', highResUrl);
                     });
                     
                     gallery.appendChild(thumbnail);
@@ -124,6 +125,19 @@
         function scrollGallery(amount) {
             document.getElementById('gallery-container').scrollBy({ left: amount, behavior: 'smooth' });
         }
+        
+        // Zoomování pomocí kolečka myši
+        const sceneEl = document.querySelector('a-scene');
+        const cameraEl = document.getElementById('camera');
+
+        sceneEl.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            let currentFov = cameraEl.getAttribute('camera').fov;
+            currentFov += e.deltaY * 0.05;
+            if (currentFov < 20) currentFov = 20;
+            if (currentFov > 100) currentFov = 100;
+            cameraEl.setAttribute('camera', 'fov', currentFov);
+        });
 
         fetchImages();
     </script>
