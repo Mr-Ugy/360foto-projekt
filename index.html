@@ -64,7 +64,7 @@
         </a-assets>
 
         <!-- Kamera s podporou zoomování -->
-        <a-camera id="camera" position="0 1.6 0" wasd-controls-enabled="false"></a-camera>
+        <a-camera id="camera" position="0 1.6 0" wasd-controls-enabled="false" look-controls-enabled="true"></a-camera>
 
         <!-- Výchozí 360° zobrazení, dynamicky se nastaví první dostupná fotka -->
         <a-sky id="sky" rotation="0 -90 0"></a-sky>
@@ -92,11 +92,12 @@
                 if (!files || files.length === 0) return;
                 
                 // Nastavení prvního obrázku jako výchozí v nejvyšší kvalitě
-                sky.setAttribute('src', files[0].url + '=s4096');
+                let firstImage = files[0].url.includes("=s") ? files[0].url : files[0].url + "=s4096";
+                sky.setAttribute('src', firstImage);
                 
                 files.forEach((file, index) => {
                     const imgId = `img${index}`;
-                    const highResUrl = file.url + '=s4096';
+                    let highResUrl = file.url.includes("=s") ? file.url : file.url + "=s4096";
                     
                     // Vytvoření assetu pro A-Frame
                     const imgElement = document.createElement('img');
@@ -134,8 +135,8 @@
             e.preventDefault();
             let currentFov = cameraEl.getAttribute('camera').fov;
             currentFov += e.deltaY * 0.05;
-            if (currentFov < 20) currentFov = 20;
-            if (currentFov > 100) currentFov = 100;
+            if (currentFov < 10) currentFov = 10;
+            if (currentFov > 120) currentFov = 120;
             cameraEl.setAttribute('camera', 'fov', currentFov);
         });
 
