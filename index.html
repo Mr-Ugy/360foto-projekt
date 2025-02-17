@@ -38,53 +38,65 @@
 </head>
 <body>
     <a-scene>
-        <a-assets>
-            <!-- Nahraj si svoje 360° fotky! -->
-            <img id="img1" src="360foto1.jpg" crossorigin="anonymous">
-            <img id="img2" src="360foto2.jpg" crossorigin="anonymous">
-            <img id="img3" src="360foto3.jpg" crossorigin="anonymous">
+        <a-assets id="assets-container">
+            <!-- Dynamicky nahrávané 360° fotky z JSON -->
         </a-assets>
 
         <!-- Kamera s nastavitelným zorným polem pro zoom -->
         <a-camera id="camera" position="0 1.6 0"></a-camera>
 
-        <!-- Výchozí 360° zobrazení, na začátku ukazuje první fotku -->
-        <a-sky id="sky" src="#img1" rotation="0 -90 0"></a-sky>
+        <!-- Výchozí 360° zobrazení, dynamicky se nastaví první dostupná fotka -->
+        <a-sky id="sky" rotation="0 -90 0"></a-sky>
     </a-scene>
 
     <!-- Galerie miniatur -->
-    <div id="gallery">
-        <img src="360foto1.jpg" data-target="#img1" alt="Fotka 1">
-        <img src="360foto2.jpg" data-target="#img2" alt="Fotka 2">
-        <img src="360foto3.jpg" data-target="#img3" alt="Fotka 3">
-    </div>
+    <div id="gallery"></div>
 
     <script>
-        // Funkce pro změnu 360° fotografie při kliknutí na miniaturu
-        const thumbnails = document.querySelectorAll('#gallery img');
-        thumbnails.forEach(function(img) {
-            img.addEventListener('click', function() {
-                const targetId = this.getAttribute('data-target');
+        const jsonUrl = "https://tvuj-web.com/360foto.json"; // Změň na svůj JSON soubor
+
+        async function fetchImages() {
+            try {
+                const response = await fetch(jsonUrl);
+                const files = await response.json();
+                
+                const assetsContainer = document.getElementById('assets-container');
+                const gallery = document.getElementById('gallery');
                 const sky = document.getElementById('sky');
-                sky.setAttribute('src', targetId);
-            });
-        });
-
-        // Zoom pomocí kolečka myši
-        const sceneEl = document.querySelector('a-scene');
-        const cameraEl = document.getElementById('camera');
-
-        sceneEl.addEventListener('wheel', function(e) {
-            e.preventDefault();
-            // Získej aktuální zorné pole kamery
-            let currentFov = cameraEl.getAttribute('camera').fov;
-            // Nastav citlivost zoomu (můžeš si pohrát s hodnotou 0.05)
-            currentFov += e.deltaY * 0.05;
-            // Omezení zorného pole, aby to nebylo moc blízko ani moc daleko
-            if (currentFov < 20) currentFov = 20;
-            if (currentFov > 100) currentFov = 100;
-            cameraEl.setAttribute('camera', 'fov', currentFov);
-        });
+                
+                if (!files || files.length === 0) return;
+                
+                // Nastavení prvního obrázku jako výchozí
+                sky.setAttribute('src', files[0].url);
+                
+                files.forEach((file, index) => {
+                    const imgId = `img${index}`;
+                    
+                    // Vytvoření assetu pro A-Frame
+                    const imgElement = document.createElement('img');
+                    imgElement.setAttribute('id', imgId);
+                    imgElement.setAttribute('src', file.url);
+                    imgElement.setAttribute('crossorigin', 'anonymous');
+                    assetsContainer.appendChild(imgElement);
+                    
+                    // Vytvoření miniatury v galerii
+                    const thumbnail = document.createElement('img');
+                    thumbnail.setAttribute('src', file.url);
+                    thumbnail.setAttribute('data-target', imgId);
+                    thumbnail.setAttribute('alt', `Fotka ${index + 1}`);
+                    
+                    thumbnail.addEventListener('click', function() {
+                        sky.setAttribute('src', file.url);
+                    });
+                    
+                    gallery.appendChild(thumbnail);
+                });
+            } catch (error) {
+                console.error('Chyba při načítání fotek:', error);
+            }
+        }
+        
+        fetchImages();
     </script>
 </body>
 </html>
