@@ -10,18 +10,26 @@
             height: 100%;
             overflow: hidden;
         }
-        /* Galerie miniatur - umístění dole uprostřed */
-        #gallery {
+        /* Kontejner pro galerii s posuvníkem */
+        #gallery-container {
             position: absolute;
             bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
+            width: 80%;
+            max-width: 1000px;
+            overflow-x: auto;
+            white-space: nowrap;
             background: rgba(0, 0, 0, 0.5);
             padding: 10px;
             border-radius: 5px;
             z-index: 1;
+            display: flex;
+            align-items: center;
+        }
+        #gallery {
+            display: inline-flex;
+            gap: 10px;
         }
         #gallery img {
             width: 100px;
@@ -34,6 +42,19 @@
         #gallery img:hover {
             border: 2px solid white;
         }
+        /* Tlačítka pro posouvání galerie */
+        .scroll-btn {
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 5px;
+        }
+        .scroll-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -43,64 +64,68 @@
         </a-assets>
 
         <!-- Kamera s nastavitelným zorným polem pro zoom -->
-    <a-camera id="camera" position="0 1.6 0"></a-camera>
+        <a-camera id="camera" position="0 1.6 0"></a-camera>
 
-    <!-- Výchozí 360° zobrazení, dynamicky se nastaví první dostupná fotka -->
-    <a-sky id="sky" rotation="0 -90 0"></a-sky>
-</a-scene>
+        <!-- Výchozí 360° zobrazení, dynamicky se nastaví první dostupná fotka -->
+        <a-sky id="sky" rotation="0 -90 0"></a-sky>
+    </a-scene>
 
-<!-- Kontejner pro posuvnou galerii -->
-<div id="gallery-container">
-    <button class="scroll-btn" onclick="scrollGallery(-200)">&#9665;</button>
-    <div id="gallery"></div>
-    <button class="scroll-btn" onclick="scrollGallery(200)">&#9655;</button>
-</div>
+    <!-- Kontejner pro posuvnou galerii -->
+    <div id="gallery-container">
+        <button class="scroll-btn" onclick="scrollGallery(-200)">&#9665;</button>
+        <div id="gallery"></div>
+        <button class="scroll-btn" onclick="scrollGallery(200)">&#9655;</button>
+    </div>
 
-<script>
-    const jsonUrl = "https://raw.githubusercontent.com/Mr-Ugy/360foto-projekt/refs/heads/main/360foto.json"; // Odkaz na JSON soubor
+    <script>
+        const jsonUrl = "https://raw.githubusercontent.com/Mr-Ugy/360foto-projekt/main/360foto.json"; // Odkaz na JSON soubor
 
-    async function fetchImages() {
-        try {
-            const response = await fetch(jsonUrl);
-            const files = await response.json();
-            
-            const assetsContainer = document.getElementById('assets-container');
-            const gallery = document.getElementById('gallery');
-            const sky = document.getElementById('sky');
-            
-            if (!files || files.length === 0) return;
-            
-            // Nastavení prvního obrázku jako výchozí
-            sky.setAttribute('src', files[0].url);
-            
-            files.forEach((file, index) => {
-                const imgId = `img${index}`;
+        async function fetchImages() {
+            try {
+                const response = await fetch(jsonUrl);
+                const files = await response.json();
                 
-                // Vytvoření assetu pro A-Frame
-                const imgElement = document.createElement('img');
-                imgElement.setAttribute('id', imgId);
-                imgElement.setAttribute('src', file.url);
-                imgElement.setAttribute('crossorigin', 'anonymous');
-                assetsContainer.appendChild(imgElement);
+                const assetsContainer = document.getElementById('assets-container');
+                const gallery = document.getElementById('gallery');
+                const sky = document.getElementById('sky');
                 
-                // Vytvoření miniatury v galerii
-                const thumbnail = document.createElement('img');
-                thumbnail.setAttribute('src', file.url);
-                thumbnail.setAttribute('data-target', imgId);
-                thumbnail.setAttribute('alt', `Fotka ${index + 1}`);
+                if (!files || files.length === 0) return;
                 
-                thumbnail.addEventListener('click', function() {
-                    sky.setAttribute('src', file.url);
+                // Nastavení prvního obrázku jako výchozí
+                sky.setAttribute('src', files[0].url);
+                
+                files.forEach((file, index) => {
+                    const imgId = `img${index}`;
+                    
+                    // Vytvoření assetu pro A-Frame
+                    const imgElement = document.createElement('img');
+                    imgElement.setAttribute('id', imgId);
+                    imgElement.setAttribute('src', file.url);
+                    imgElement.setAttribute('crossorigin', 'anonymous');
+                    assetsContainer.appendChild(imgElement);
+                    
+                    // Vytvoření miniatury v galerii
+                    const thumbnail = document.createElement('img');
+                    thumbnail.setAttribute('src', file.url);
+                    thumbnail.setAttribute('data-target', imgId);
+                    thumbnail.setAttribute('alt', `Fotka ${index + 1}`);
+                    
+                    thumbnail.addEventListener('click', function() {
+                        sky.setAttribute('src', file.url);
+                    });
+                    
+                    gallery.appendChild(thumbnail);
                 });
-                
-                gallery.appendChild(thumbnail);
-            });
-        } catch (error) {
-            console.error('Chyba při načítání fotek:', error);
+            } catch (error) {
+                console.error('Chyba při načítání fotek:', error);
+            }
         }
-    }
-    
-    fetchImages();
-</script>
+        
+        function scrollGallery(amount) {
+            document.getElementById('gallery-container').scrollBy({ left: amount, behavior: 'smooth' });
+        }
+
+        fetchImages();
+    </script>
 </body>
 </html>
