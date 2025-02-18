@@ -11,21 +11,27 @@
             overflow: hidden;
         }
         /* Kontejner pro galerii s posuvníkem */
-        #gallery-container {
+        #gallery-wrapper {
             position: absolute;
             bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
             width: 80%;
             max-width: 1000px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+        #gallery-container {
             overflow-x: auto;
             white-space: nowrap;
             background: rgba(0, 0, 0, 0.5);
             padding: 10px;
             border-radius: 5px;
-            z-index: 1;
             display: flex;
             align-items: center;
+            flex-grow: 1;
         }
         #gallery {
             display: inline-flex;
@@ -51,6 +57,7 @@
             cursor: pointer;
             font-size: 18px;
             border-radius: 5px;
+            margin: 0 10px;
         }
         .scroll-btn:hover {
             background: rgba(255, 255, 255, 0.3);
@@ -71,9 +78,11 @@
     </a-scene>
 
     <!-- Kontejner pro posuvnou galerii -->
-    <div id="gallery-container">
+    <div id="gallery-wrapper">
         <button class="scroll-btn" onclick="scrollGallery(-200)">&#9665;</button>
-        <div id="gallery"></div>
+        <div id="gallery-container">
+            <div id="gallery"></div>
+        </div>
         <button class="scroll-btn" onclick="scrollGallery(200)">&#9655;</button>
     </div>
 
