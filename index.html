@@ -75,18 +75,11 @@
 </head>
 <body>
     <a-scene>
-        <a-assets id="assets-container">
-            <!-- Dynamicky nahrávané 360° fotky z JSON -->
-        </a-assets>
-
-        <!-- Kamera s podporou zoomování -->
-        <a-camera id="camera" position="0 1.6 0" wasd-controls-enabled="false" look-controls-enabled="true"></a-camera>
-
-        <!-- Výchozí 360° zobrazení, dynamicky se nastaví první dostupná fotka -->
+        <a-assets id="assets-container"></a-assets>
+        <a-camera id="camera" position="0 1.6 0"></a-camera>
         <a-sky id="sky" rotation="0 -90 0"></a-sky>
     </a-scene>
 
-    <!-- Kontejner pro posuvnou galerii -->
     <div id="gallery-wrapper">
         <button class="scroll-btn scroll-left" onclick="scrollGallery(-200)">&#9665;</button>
         <div id="gallery-container">
@@ -96,67 +89,35 @@
     </div>
 
     <script>
-        const jsonUrl = "https://raw.githubusercontent.com/Mr-Ugy/360foto-projekt/refs/heads/main/360foto.json"; // Odkaz na JSON soubor
+        const jsonUrl = "https://raw.githubusercontent.com/Mr-Ugy/360foto-projekt/refs/heads/main/360foto.json";
 
         async function fetchImages() {
             try {
                 const response = await fetch(jsonUrl);
                 const files = await response.json();
-                
-                const assetsContainer = document.getElementById('assets-container');
                 const gallery = document.getElementById('gallery');
                 const sky = document.getElementById('sky');
-                
+
                 if (!files || files.length === 0) return;
-                
-                // Nastavení prvního obrázku jako výchozí v nejvyšší kvalitě
-                let firstImage = files[0].url.includes("=s") ? files[0].url : files[0].url + "=s4096";
-                sky.setAttribute('src', firstImage);
-                
+                sky.setAttribute('src', files[0].url);
+
                 files.forEach((file, index) => {
-                    const imgId = `img${index}`;
-                    let highResUrl = file.url.includes("=s") ? file.url : file.url + "=s4096";
-                    
-                    // Vytvoření assetu pro A-Frame
-                    const imgElement = document.createElement('img');
-                    imgElement.setAttribute('id', imgId);
-                    imgElement.setAttribute('src', highResUrl);
-                    imgElement.setAttribute('crossorigin', 'anonymous');
-                    assetsContainer.appendChild(imgElement);
-                    
-                    // Vytvoření miniatury v galerii
                     const thumbnail = document.createElement('img');
-                    thumbnail.setAttribute('src', highResUrl);
-                    thumbnail.setAttribute('data-target', imgId);
+                    thumbnail.setAttribute('src', file.url);
                     thumbnail.setAttribute('alt', `Fotka ${index + 1}`);
-                    
-                    thumbnail.addEventListener('click', function() {
-                        sky.setAttribute('src', highResUrl);
+                    thumbnail.addEventListener('click', () => {
+                        sky.setAttribute('src', file.url);
                     });
-                    
                     gallery.appendChild(thumbnail);
                 });
             } catch (error) {
                 console.error('Chyba při načítání fotek:', error);
             }
         }
-        
+
         function scrollGallery(amount) {
             document.getElementById('gallery-container').scrollBy({ left: amount, behavior: 'smooth' });
         }
-        
-        // Zoomování pomocí kolečka myši
-        const sceneEl = document.querySelector('a-scene');
-        const cameraEl = document.getElementById('camera');
-
-        sceneEl.addEventListener('wheel', function(e) {
-            e.preventDefault();
-            let currentFov = cameraEl.getAttribute('camera').fov;
-            currentFov += e.deltaY * 0.05;
-            if (currentFov < 10) currentFov = 10;
-            if (currentFov > 120) currentFov = 120;
-            cameraEl.setAttribute('camera', 'fov', currentFov);
-        });
 
         fetchImages();
     </script>
