@@ -32,6 +32,7 @@
             display: flex;
             align-items: center;
             flex-grow: 1;
+            position: relative;
         }
         #gallery {
             display: inline-flex;
@@ -50,14 +51,22 @@
         }
         /* Tlačítka pro posouvání galerie */
         .scroll-btn {
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.7);
             color: white;
             border: none;
             padding: 10px;
             cursor: pointer;
             font-size: 18px;
             border-radius: 5px;
-            margin: 0 10px;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .scroll-left {
+            left: -50px;
+        }
+        .scroll-right {
+            right: -50px;
         }
         .scroll-btn:hover {
             background: rgba(255, 255, 255, 0.3);
@@ -79,11 +88,11 @@
 
     <!-- Kontejner pro posuvnou galerii -->
     <div id="gallery-wrapper">
-        <button class="scroll-btn" onclick="scrollGallery(-200)">&#9665;</button>
+        <button class="scroll-btn scroll-left" onclick="scrollGallery(-200)">&#9665;</button>
         <div id="gallery-container">
             <div id="gallery"></div>
         </div>
-        <button class="scroll-btn" onclick="scrollGallery(200)">&#9655;</button>
+        <button class="scroll-btn scroll-right" onclick="scrollGallery(200)">&#9655;</button>
     </div>
 
     <script>
